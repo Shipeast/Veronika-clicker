@@ -128,15 +128,13 @@ function updateUI(){
 // AUTCLICK DETECTION
 let lastClickTime=0;
 let clickCounter=0;
-const clickWarningLimit=20; // kliků za sekundu
+const clickWarningLimit=20;
 
 clickImg.onclick=e=>{
-  const now=Date.now();
   clickCounter++;
   setTimeout(()=>clickCounter--,1000);
   if(clickCounter>clickWarningLimit){showWarning("Příliš rychlé klikání!");return;}
-
-  const a=new Audio(clickSound);a.play().catch(()=>{});
+  playSound(clickSound);
   let gain=s.perClick;
   const skin=skins[s.skinIndex];
   if(skin.bonus?.perClickMult) gain*=skin.bonus.perClickMult;
@@ -225,7 +223,6 @@ btnLoot.onclick=()=>{
   updateUI();save();
   showSkinBonus(skins[i]);
 };
-
 function showSkinBonus(skin){
   let text="Získán skin: "+skin.name+" | ";
   if(skin.bonus){
@@ -251,22 +248,32 @@ setInterval(()=>{
   updateUI();
 },200);
 
-// TRIAL SKIN
+// TRIAL SKIN SELECTION
+const trialSelect=document.createElement("select");
+trialSelect.className="btn";
+skins.forEach((sk,i)=>{
+  if(i===0) return; // přeskočit základní
+  const opt=document.createElement("option");
+  opt.value=i; opt.textContent=sk.name+" ("+sk.rarity+")";
+  trialSelect.appendChild(opt);
+});
+document.querySelector(".shop").appendChild(trialSelect);
+
 const trialBtn=document.createElement("button");
-trialBtn.className="btn"; trialBtn.textContent="Vyzkoušet trial skin"; 
+trialBtn.className="btn"; trialBtn.textContent="Vyzkoušet skin";
 document.querySelector(".shop").appendChild(trialBtn);
 
 let trialCooldown=false;
 
 trialBtn.onclick=()=>{
   if(trialCooldown) return;
-
-  const trialSkin=skins[skins.length-1]; // Legendary skin
+  const skinIndex=parseInt(trialSelect.value);
+  const trialSkin=skins[skinIndex];
   const prevIndex=s.skinIndex;
+
   clickImg.src=trialSkin.file;
   clickArea.className="click-area rarity-"+trialSkin.rarity;
 
-  // zobrazíme pop-up s hypotetickými bonusy
   let text="Trial Skin: "+trialSkin.name+" | ";
   if(trialSkin.bonus){
     if(trialSkin.bonus.perClick) text+="+ "+trialSkin.bonus.perClick+" perClick ";
@@ -283,19 +290,17 @@ trialBtn.onclick=()=>{
   trialBtn.disabled=true;
   trialCooldown=true;
 
-  // po 30s vrátíme původní skin
   setTimeout(()=>{
     clickImg.src=skins[prevIndex].file;
     clickArea.className="click-area rarity-"+skins[prevIndex].rarity;
   },30000);
 
-  // 5 minut cooldown
   let cooldownTime=300;
   const interval=setInterval(()=>{
     cooldownTime--;
-    trialBtn.textContent="Cooldown: "+Math.ceil(cooldownTime/60)+":"+("0"+(cooldownTime%60)).toString().padStart(2,"0");
+    trialBtn.textContent="Cooldown: "+Math.ceil(cooldownTime/60)+":"+("0"+(cooldownTime%60)).padStart(2,"0");
     if(cooldownTime<=0){
-      trialBtn.textContent="Vyzkoušet trial skin";
+      trialBtn.textContent="Vyzkoušet skin";
       trialBtn.disabled=false;
       trialCooldown=false;
       clearInterval(interval);
@@ -304,7 +309,7 @@ trialBtn.onclick=()=>{
 };
 
 // SAVE/LOAD
-const KEY="clicker_skins_v6";
+const KEY="clicker_skins_v7";
 function save(){localStorage.setItem(KEY,JSON.stringify(s));}
 function load(){
   const r=localStorage.getItem(KEY);

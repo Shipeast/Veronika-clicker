@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Simple Clicker</title>
+<style>
+  :root{--bg:#0f1720;--card:#0b1220;--accent:#22c55e;--muted:#9ca3af}
+  html,body{height:100%}
+  body{
+    margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#071028 0%, #071526 100%);
+    color:#e6eef6;
+  }
+  .wrap{width:100%;max-width:920px;padding:24px;box-sizing:border-box}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));border-radius:12px;padding:18px;display:grid;grid-template-columns:250px 1fr;gap:18px;box-shadow:0 6px 30px rgba(2,6,23,0.6)}
+  .click-area{background:var(--card);border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:220px;position:relative}
+  .click-img{width:180px;height:180px;object-fit:contain;cursor:pointer;border-radius:10px;transition:transform .08s ease, filter .12s}
+  .click-img:active{transform:scale(.96)}
+  .score{font-size:20px;margin-top:12px}
+  .panel{display:flex;flex-direction:column;gap:12px}
+  .big-score{font-size:36px;font-weight:700;color:var(--accent)}
+  .row{display:flex;align-items:center;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.02);border-radius:8px}
+  .btn{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.03);padding:8px 10px;border-radius:8px;cursor:pointer}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .shop{display:flex;flex-direction:column;gap:8px}
+  .shop-item{display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .muted{color:var(--muted);font-size:13px}
+  footer{margin-top:10px;color:var(--muted);font-size:13px;text-align:center}
+  /* click particle */
+  .pop{
+    position:absolute;pointer-events:none;font-weight:700;color:var(--accent);transform:translate(-50%,-50%) scale(1);
+    animation:pop .8s forwards;
+  }
+  @keyframes pop{
+    0%{opacity:1;transform:translate(-50%,-50%) translateY(0) scale(1)}
+    100%{opacity:0;transform:translate(-50%,-50%) translateY(-40px) scale(1.2)}
+  }
+  @media (max-width:700px){.card{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="application" aria-label="Clicker hra">
+      <div class="click-area" id="clickArea">
+        <!-- Název lokálního souboru obrázku -->
+        <img src="click.png" id="clickImg" class="click-img" alt="Klikací obrázek" tabindex="0" />
+        <div class="score muted">Kliky celkem</div>
+        <div class="big-score" id="scoreDisplay">0</div>
+      </div>
+
+      <div class="panel">
+        <div class="row">
+          <div>
+            <div style="font-size:14px">Počet kliků</div>
+            <div class="muted" id="perClick">+1 za klik</div>
+          </div>
+          <div>
+            <button class="btn" id="resetBtn">Reset</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <div style="font-size:14px">Auto-klikače (CPS)</div>
+            <div class="muted" id="cpsDisplay">0 /s</div>
+          </div>
+          <div>
+            <button class="btn" id="buyAuto">Koupit auto</button>
+          </div>
+        </div>
+
+        <div class="shop">
+          <div class="muted">Obchod</div>
+          <div class="shop-item row">
+            <div>
+              <div><strong>Malý bonus</strong></div>
+              <div class="muted">Zvýší za klik o +1</div>
+            </div>
+            <div>
+              <div class="muted" id="smallPrice">Cena: 50</div>
+              <button class="btn" id="buySmall">Koupit</button>
+            </div>
+          </div>
+
+          <div class="shop-item row">
+            <div>
+              <div><strong>Velký bonus</strong></div>
+              <div class="muted">Zvýší za klik o +5</div>
+            </div>
+            <div>
+              <div class="muted" id="bigPrice">Cena: 400</div>
+              <button class="btn" id="buyBig">Koupit</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div style="font-size:14px">Uloženo lokálně</div>
+          <div class="muted" id="savedAt">—</div>
+        </div>
+
+        <footer>Stačí nahrát `index.html` + `click.png` do stejné složky na GitHubu a zapnout Pages.</footer>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*
+  Jednoduchý clicker:
+  - klik na obrázek přidá points (perClick)
+  - lze koupit auto (adds cps every second)
+  - shop: small (+1 perClick) a big (+5 perClick)
+  - ukládání do localStorage
+*/
+(() => {
+  const KEY = 'simple_clicker_v1';
+  const clickImg = document.getElementById('clickImg');
+  const scoreDisplay = document.getElementById('scoreDisplay');
+  const perClickEl = document.getElementById('perClick');
+  const cpsEl = document.getElementById('cpsDisplay');
+  const buyAuto = document.getElementById('buyAuto');
+  const resetBtn = document.getElementById('resetBtn');
+  const buySmall = document.getElementById('buySmall');
+  const buyBig = document.getElementById('buyBig');
+  const smallPriceEl = document.getElementById('smallPrice');
+  const bigPriceEl = document.getElementById('bigPrice');
+  const savedAtEl = document.getElementById('savedAt');
+  const clickArea = document.getElementById('clickArea');
+
+  let state = {
+    points:0,
+    perClick:1,
+    cps:0,        // auto clicks per second (count of autos)
+    autos:0,
+    smallOwned:0,
+    bigOwned:0,
+    lastSaved: null
+  };
+
+  const prices = {
+    auto: 100,
+    small: 50,
+    big: 400
+  };
+
+  function save(){
+    state.lastSaved = new Date().toISOString();
+    localStorage.setItem(KEY, JSON.stringify(state));
+    updateUI();
+  }
+
+  function load(){
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      try{
+        const parsed = JSON.parse(raw);
+        Object.assign(state, parsed);
+      }catch(e){
+        console.warn('Chybná data, resetuju');
+      }
+    }
+    updateUI();
+  }
+
+  function updateUI(){
+    scoreDisplay.textContent = Math.floor(state.points);
+    perClickEl.textContent = `+${state.perClick} za klik`;
+    cpsEl.textContent = `${(state.cps).toFixed(1)} /s`;
+    smallPriceEl.textContent = `Cena: ${prices.small}`;
+    bigPriceEl.textContent = `Cena: ${prices.big}`;
+    savedAtEl.textContent = state.lastSaved ? new Date(state.lastSaved).toLocaleString() : '—';
+    buyAuto.textContent = `Koupit auto (${prices.auto})`;
+    buyAuto.disabled = state.points < prices.auto;
+    buySmall.disabled = state.points < prices.small;
+    buyBig.disabled = state.points < prices.big;
+  }
+
+  function spawnPop(x,y,txt){
+    const el = document.createElement('div');
+    el.className = 'pop';
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.textContent = txt;
+    clickArea.appendChild(el);
+    setTimeout(()=>el.remove(),900);
+  }
+
+  // click handler
+  function doClick(e){
+    state.points += state.perClick;
+    updateUI();
+    // spawn pop near cursor (if available)
+    let rect = clickArea.getBoundingClientRect();
+    let x = (e.clientX || rect.left + rect.width/2) - rect.left;
+    let y = (e.clientY || rect.top + rect.height/2) - rect.top;
+    spawnPop(x,y,'+'+state.perClick);
+    // quick visual pulse
+    clickImg.style.filter = 'brightness(1.05)';
+    setTimeout(()=>clickImg.style.filter = '',80);
+    save();
+  }
+
+  // keyboard accessibility
+  clickImg.addEventListener('keydown', (ev)=>{
+    if(ev.key === 'Enter' || ev.key === ' '){
+      ev.preventDefault();
+      doClick(ev);
+    }
+  });
+
+  clickImg.addEventListener('click', doClick);
+
+  // buy auto
+  buyAuto.addEventListener('click', ()=>{
+    if(state.points >= prices.auto){
+      state.points -= prices.auto;
+      state.autos += 1;
+      state.cps = state.autos * 1; // each auto = 1 cps
+      // increase price slightly
+      prices.auto = Math.floor(prices.auto * 1.2);
+      save();
+      updateUI();
+    }
+  });
+
+  // buy small (increase perClick +1)
+  buySmall.addEventListener('click', ()=>{
+    if(state.points >= prices.small){
+      state.points -= prices.small;
+      state.perClick += 1;
+      state.smallOwned += 1;
+      prices.small = Math.floor(prices.small * 1.5);
+      save();
+      updateUI();
+    }
+  });
+
+  // buy big (+5 perClick)
+  buyBig.addEventListener('click', ()=>{
+    if(state.points >= prices.big){
+      state.points -= prices.big;
+      state.perClick += 5;
+      state.bigOwned += 1;
+      prices.big = Math.floor(prices.big * 1.6);
+      save();
+      updateUI();
+    }
+  });
+
+  // autos: add points every 200ms to make CPS smoother
+  setInterval(()=>{
+    const gainPerTick = state.cps / 5; // 5 ticks per second (200ms)
+    state.points += gainPerTick;
+    updateUI();
+  }, 200);
+
+  // periodic save
+  setInterval(save, 5000);
+
+  // reset
+  resetBtn.addEventListener('click', ()=>{
+    if(!confirm('Opravdu resetovat progres?')) return;
+    localStorage.removeItem(KEY);
+    state = {points:0,perClick:1,cps:0,autos:0,smallOwned:0,bigOwned:0,lastSaved:null};
+    prices.auto = 100; prices.small = 50; prices.big = 400;
+    updateUI();
+  });
+
+  // initial load
+  load();
+
+  // quick hint: if image missing, show message
+  clickImg.addEventListener('error', ()=>{
+    clickImg.style.display = 'none';
+    const p = document.createElement('div');
+    p.style.color = '#ffb4b4';
+    p.style.textAlign = 'center';
+    p.innerHTML = 'Obrázek nenalezen.<br>Vložte do stejné složky soubor <code>click.png</code>';
+    clickArea.prepend(p);
+  });
+
+})();
+</script>
+</body>
+</html>

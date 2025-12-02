@@ -3,87 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Clicker se skiny</title>
+<title>Clicker se skiny a lootboxy</title>
 <style>
-:root {
-  --bg:#0f1720;
-  --card:#1e1e2f;
-  --accent:#22c55e;
-  --muted:#9ca3af;
-  --hover:#2a2a40;
-  transition: all .4s ease;
+:root{
+  --bg:#0f1720; --card:#1e1e2f; --accent:#22c55e; --muted:#9ca3af;
+  --common:#777; --rare:#3b82f6; --epic:#a855f7; --legendary:#fbbf24;
 }
-body {
-  margin:0;
-  background: var(--bg);
-  font-family: system-ui, sans-serif;
-  display:flex;justify-content:center;align-items:center;
-  min-height:100vh;color:#e7eef6;
+body{
+  margin:0; background:var(--bg); font-family:system-ui,sans-serif;
+  display:flex; justify-content:center; align-items:center; min-height:100vh; color:#e7eef6;
 }
-.wrap {width:100%;max-width:960px;padding:20px;box-sizing:border-box}
-.card {
-  display:grid;grid-template-columns:280px 1fr;gap:20px;
-  background:var(--card);padding:20px;border-radius:16px;
-  box-shadow:0 0 40px rgba(0,0,0,0.7);
-}
-.click-area {
-  background:#0b1120;padding:15px;border-radius:16px;
-  display:flex;flex-direction:column;align-items:center;position:relative;
-  overflow:hidden;transition:box-shadow .3s;
-}
-.click-img {
-  width:200px;height:200px;object-fit:contain;cursor:pointer;border-radius:12px;
-  transition:transform .08s, filter .12s;
-}
-.click-img:active {transform:scale(.92)}
-.big-score {font-size:38px;font-weight:bold;color:var(--accent);margin-top:10px}
-.muted {color:var(--muted);font-size:13px}
-.panel {display:flex;flex-direction:column;gap:12px}
-.row {
-  display:flex;justify-content:space-between;align-items:center;
-  padding:10px;background:rgba(255,255,255,0.05);border-radius:8px
-}
-.btn {
-  cursor:pointer;padding:8px 14px;border-radius:10px;
-  background:rgba(255,255,255,0.1);border:0;color:white;
-  font-weight:bold;transition:all .2s;
-}
-.btn:hover {background:rgba(255,255,255,0.2);transform:scale(1.05)}
-.btn:disabled {opacity:.45;cursor:not-allowed}
-.shop {display:flex;flex-direction:column;gap:10px;margin-top:10px}
-.shop-item {
-  display:flex;justify-content:space-between;align-items:center;
-  padding:10px;background:rgba(255,255,255,0.05);border-radius:10px;
-  transition:all .2s;
-}
+.wrap{width:100%;max-width:960px;padding:20px;box-sizing:border-box}
+.card{display:grid;grid-template-columns:280px 1fr;gap:20px;background:var(--card);padding:20px;border-radius:16px;box-shadow:0 0 40px rgba(0,0,0,0.7);}
+.click-area{background:#0b1120;padding:15px;border-radius:16px;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden;transition:box-shadow .3s;}
+.click-img{width:200px;height:200px;object-fit:contain;cursor:pointer;border-radius:12px;transition:transform .08s, filter .12s;}
+.click-img:active{transform:scale(.92);}
+.big-score{font-size:38px;font-weight:bold;color:var(--accent);margin-top:10px}
+.muted{color:var(--muted);font-size:13px}
+.panel{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.05);border-radius:8px}
+.btn{cursor:pointer;padding:8px 14px;border-radius:10px;background:rgba(255,255,255,0.1);border:0;color:white;font-weight:bold;transition:all .2s;}
+.btn:hover{background:rgba(255,255,255,0.2);transform:scale(1.05);}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.shop{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.shop-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.05);border-radius:10px;transition:all .2s;}
 .shop-item:hover{background:rgba(255,255,255,0.12)}
-/* pop efekty při kliknutí */
-.pop {
-  position:absolute;pointer-events:none;font-weight:bold;color:var(--accent);
-  animation:pop .7s forwards;
+.pop{position:absolute;pointer-events:none;font-weight:bold;color:var(--accent);animation:pop .7s forwards;}
+@keyframes pop{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-45px) scale(1.3)}}
+.loot-anim{position:absolute;inset:0;border-radius:16px;pointer-events:none;animation:lootFlash .8s ease-out;}
+@keyframes lootFlash{0%{opacity:0;box-shadow:0 0 0 #fff}30%{opacity:1;box-shadow:0 0 60px 20px #fbbf24;}100%{opacity:0;box-shadow:0 0 0 #fff}}
+.rarity-common{box-shadow:0 0 25px 5px var(--common);}
+.rarity-rare{box-shadow:0 0 30px 8px var(--rare)aa;}
+.rarity-epic{box-shadow:0 0 40px 10px var(--epic)aa;}
+.rarity-legendary{box-shadow:0 0 55px 14px var(--legendary)aa;}
+.tooltip{
+  position:absolute;padding:5px 10px;border-radius:6px;background:rgba(0,0,0,0.8);color:white;font-size:12px;pointer-events:none;opacity:0;transition:opacity .2s;
 }
-@keyframes pop {
-  0%{opacity:1;transform:translateY(0) scale(1)}
-  100%{opacity:0;transform:translateY(-45px) scale(1.3)}
-}
-/* lootbox animace */
-.loot-anim {
-  position:absolute;
-  inset:0;
-  border-radius:16px;
-  pointer-events:none;
-  animation:lootFlash .8s ease-out;
-}
-@keyframes lootFlash {
-  0% {opacity:0;box-shadow:0 0 0 #fff}
-  30% {opacity:1;box-shadow:0 0 60px 20px #fbbf24;}
-  100% {opacity:0;box-shadow:0 0 0 #fff}
-}
-/* rarity glow */
-.rarity-common {box-shadow:0 0 25px 5px #7774;}
-.rarity-rare {box-shadow:0 0 30px 8px #3b82f6aa;}
-.rarity-epic {box-shadow:0 0 40px 10px #a855f7aa;}
-.rarity-legendary {box-shadow:0 0 55px 14px #fbbf24aa;}
 @media(max-width:720px){.card{grid-template-columns:1fr}}
 </style>
 </head>
@@ -94,6 +49,7 @@ body {
       <img src="IMG_3480.png" id="clickImg" class="click-img" alt="Klikni">
       <div class="muted">Kliky celkem</div>
       <div class="big-score" id="scoreDisplay">0</div>
+      <div class="tooltip" id="tooltip"></div>
     </div>
     <div class="panel">
       <div class="row"><div>Za klik</div><div class="muted" id="perClick">+1</div></div>
@@ -123,13 +79,14 @@ let price={small:50,big:400,ultra:2000,megaAuto:1500,hyperAuto:8000,loot:1000};
 
 // SKINS
 const skins=[
-{file:"IMG_3480.png",rarity:"common",bonus:null},
-{file:"IMG_3481.png",rarity:"common",bonus:{perClick:1}},
-{file:"IMG_3482.png",rarity:"common",bonus:{cps:1}},
-{file:"IMG_3483.png",rarity:"rare",bonus:{perClick:3}},
-{file:"IMG_3484.png",rarity:"rare",bonus:{cps:3}},
-{file:"IMG_3485.png",rarity:"epic",bonus:{perClickMult:1.3}},
-{file:"IMG_3486.png",rarity:"epic",bonus:{cpsMult:1.4}}
+{file:"IMG_3480.png",rarity:"common",bonus:null,name:"Základní"},
+{file:"IMG_3481.png",rarity:"common",bonus:{perClick:1},name:"Skin 1"},
+{file:"IMG_3482.png",rarity:"common",bonus:{cps:1},name:"Skin 2"},
+{file:"IMG_3483.png",rarity:"rare",bonus:{perClick:3},name:"Skin 3"},
+{file:"IMG_3484.png",rarity:"rare",bonus:{cps:3},name:"Skin 4"},
+{file:"IMG_3485.png",rarity:"epic",bonus:{perClickMult:1.3},name:"Skin 5"},
+{file:"IMG_3486.png",rarity:"epic",bonus:{cpsMult:1.4},name:"Skin 6"},
+{file:"IMG_3503.png",rarity:"legendary",bonus:{perClickMult:2,cpsMult:2},name:"Legendary Skin"}
 ];
 
 // ELEMENTY
@@ -138,6 +95,7 @@ const perClickEl=document.getElementById("perClick");
 const cpsEl=document.getElementById("cpsDisplay");
 const clickImg=document.getElementById("clickImg");
 const clickArea=document.getElementById("clickArea");
+const tooltip=document.getElementById("tooltip");
 const btnSmall=document.getElementById("buySmall");
 const btnBig=document.getElementById("buyBig");
 const btnUltra=document.getElementById("buyUltra");
@@ -167,15 +125,26 @@ function updateUI(){
   btnLoot.disabled=s.points<price.loot;
 }
 
-// CLICK
+// AUTCLICK DETECTION
+let lastClickTime=0;
+let clickCounter=0;
+const clickWarningLimit=20; // kliků za sekundu
+
 clickImg.onclick=e=>{
+  const now=Date.now();
+  clickCounter++;
+  setTimeout(()=>clickCounter--,1000);
+  if(clickCounter>clickWarningLimit){showWarning("Příliš rychlé klikání!");return;}
+
   const a=new Audio(clickSound);a.play().catch(()=>{});
   let gain=s.perClick;
   const skin=skins[s.skinIndex];
   if(skin.bonus?.perClickMult) gain*=skin.bonus.perClickMult;
   s.points+=gain+(skin.bonus?.perClick||0);
+
   const rect=clickArea.getBoundingClientRect();
   spawnPop(e.clientX-rect.left,e.clientY-rect.top,"+"+Math.floor(gain));
+
   clickImg.style.filter="brightness(1.35)";
   setTimeout(()=>clickImg.style.filter="",100);
   updateUI();save();
@@ -186,6 +155,31 @@ function spawnPop(x,y,text){
   el.textContent=text;clickArea.appendChild(el);
   setTimeout(()=>el.remove(),900);
 }
+function showWarning(text){
+  const el=document.createElement("div");
+  el.className="pop"; el.textContent=text;
+  el.style.left="50%"; el.style.top="5%"; el.style.transform="translateX(-50%)";
+  el.style.background="rgba(255,50,50,0.8)"; el.style.color="#fff";
+  clickArea.appendChild(el);
+  setTimeout(()=>el.remove(),2000);
+}
+
+// TOOLTIP
+clickArea.onmousemove=e=>{
+  const skin=skins[s.skinIndex];
+  let bonusText="";
+  if(skin.bonus){
+    if(skin.bonus.perClick) bonusText+="+"+skin.bonus.perClick+" perClick ";
+    if(skin.bonus.cps) bonusText+="+"+skin.bonus.cps+" CPS ";
+    if(skin.bonus.perClickMult) bonusText+="×"+skin.bonus.perClickMult+" perClick ";
+    if(skin.bonus.cpsMult) bonusText+="×"+skin.bonus.cpsMult+" CPS ";
+  } else bonusText="Žádný bonus";
+  tooltip.textContent=skin.name+" | "+bonusText;
+  tooltip.style.left=(e.offsetX+15)+"px";
+  tooltip.style.top=(e.offsetY-25)+"px";
+  tooltip.style.opacity=1;
+}
+clickArea.onmouseleave=()=>{tooltip.style.opacity=0;}
 
 // SHOP
 btnSmall.onclick=()=>buy("small",1);
@@ -193,15 +187,13 @@ btnBig.onclick=()=>buy("big",5);
 btnUltra.onclick=()=>buy("ultra",20);
 btnMega.onclick=()=>{
   if(s.points<price.megaAuto) return;
-  s.points-=price.megaAuto;
-  s.cps+=5;
+  s.points-=price.megaAuto; s.cps+=5;
   price.megaAuto=Math.floor(price.megaAuto*1.45);
   updateUI();save();
 };
 btnHyper.onclick=()=>{
   if(s.points<price.hyperAuto) return;
-  s.points-=price.hyperAuto;
-  s.cps+=20;
+  s.points-=price.hyperAuto; s.cps+=20;
   price.hyperAuto=Math.floor(price.hyperAuto*1.4);
   updateUI();save();
 };
@@ -220,15 +212,34 @@ btnLoot.onclick=()=>{
   playSound(lootSound);
   const fx=document.createElement("div");fx.className="loot-anim";clickArea.appendChild(fx);
   setTimeout(()=>fx.remove(),900);
-  let i=Math.floor(Math.random()*(skins.length-1))+1;
-  s.skinIndex=i;
-  clickImg.src=skins[i].file;
+
+  let rand=Math.random(); let i;
+  if(rand<0.01) i=skins.length-1;
+  else i=Math.floor(Math.random()*(skins.length-1));
+  s.skinIndex=i; clickImg.src=skins[i].file;
   clickArea.className="click-area rarity-"+skins[i].rarity;
-  clickArea.style.transition="transform .15s";
-  clickArea.style.transform="scale(1.05) rotate(2deg)";
-  setTimeout(()=>clickArea.style.transform="",160);
+
+  clickImg.style.transform="scale(0) rotate(-30deg)";
+  setTimeout(()=>clickImg.style.transform="scale(1.2) rotate(10deg)",200);
+  setTimeout(()=>clickImg.style.transform="scale(1) rotate(0deg)",400);
   updateUI();save();
+  showSkinBonus(skins[i]);
 };
+
+function showSkinBonus(skin){
+  let text="Získán skin: "+skin.name+" | ";
+  if(skin.bonus){
+    if(skin.bonus.perClick) text+="+ "+skin.bonus.perClick+" perClick ";
+    if(skin.bonus.cps) text+="+ "+skin.bonus.cps+" CPS ";
+    if(skin.bonus.perClickMult) text+="×"+skin.bonus.perClickMult+" perClick ";
+    if(skin.bonus.cpsMult) text+="×"+skin.bonus.cpsMult+" CPS ";
+  } else text+="Žádný bonus";
+  const el=document.createElement("div");
+  el.className="pop"; el.textContent=text;
+  el.style.left="50%"; el.style.top="10%"; el.style.transform="translateX(-50%)";
+  clickArea.appendChild(el);
+  setTimeout(()=>el.remove(),2500);
+}
 
 // CPS LOOP
 setInterval(()=>{
@@ -240,8 +251,60 @@ setInterval(()=>{
   updateUI();
 },200);
 
+// TRIAL SKIN
+const trialBtn=document.createElement("button");
+trialBtn.className="btn"; trialBtn.textContent="Vyzkoušet trial skin"; 
+document.querySelector(".shop").appendChild(trialBtn);
+
+let trialCooldown=false;
+
+trialBtn.onclick=()=>{
+  if(trialCooldown) return;
+
+  const trialSkin=skins[skins.length-1]; // Legendary skin
+  const prevIndex=s.skinIndex;
+  clickImg.src=trialSkin.file;
+  clickArea.className="click-area rarity-"+trialSkin.rarity;
+
+  // zobrazíme pop-up s hypotetickými bonusy
+  let text="Trial Skin: "+trialSkin.name+" | ";
+  if(trialSkin.bonus){
+    if(trialSkin.bonus.perClick) text+="+ "+trialSkin.bonus.perClick+" perClick ";
+    if(trialSkin.bonus.cps) text+="+ "+trialSkin.bonus.cps+" CPS ";
+    if(trialSkin.bonus.perClickMult) text+="×"+trialSkin.bonus.perClickMult+" perClick ";
+    if(trialSkin.bonus.cpsMult) text+="×"+trialSkin.bonus.cpsMult+" CPS ";
+  } else text+="Žádné bonusy (trial)";
+  const el=document.createElement("div");
+  el.className="pop"; el.textContent=text;
+  el.style.left="50%"; el.style.top="10%"; el.style.transform="translateX(-50%)";
+  clickArea.appendChild(el);
+  setTimeout(()=>el.remove(),3000);
+
+  trialBtn.disabled=true;
+  trialCooldown=true;
+
+  // po 30s vrátíme původní skin
+  setTimeout(()=>{
+    clickImg.src=skins[prevIndex].file;
+    clickArea.className="click-area rarity-"+skins[prevIndex].rarity;
+  },30000);
+
+  // 5 minut cooldown
+  let cooldownTime=300;
+  const interval=setInterval(()=>{
+    cooldownTime--;
+    trialBtn.textContent="Cooldown: "+Math.ceil(cooldownTime/60)+":"+("0"+(cooldownTime%60)).toString().padStart(2,"0");
+    if(cooldownTime<=0){
+      trialBtn.textContent="Vyzkoušet trial skin";
+      trialBtn.disabled=false;
+      trialCooldown=false;
+      clearInterval(interval);
+    }
+  },1000);
+};
+
 // SAVE/LOAD
-const KEY="clicker_skins_v3";
+const KEY="clicker_skins_v6";
 function save(){localStorage.setItem(KEY,JSON.stringify(s));}
 function load(){
   const r=localStorage.getItem(KEY);
@@ -254,8 +317,7 @@ function load(){
 resetBtn.onclick=()=>{if(!confirm("Opravdu resetovat?")) return;localStorage.removeItem(KEY);location.reload();}
 
 // INIT
-load();
-updateUI();
+load(); updateUI();
 </script>
 </body>
 </html>

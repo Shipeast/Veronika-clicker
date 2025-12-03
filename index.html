@@ -1,264 +1,29 @@
-<!doctype html>
-<html lang="cs">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Clicker se skiny a lootboxy</title>
-<style>
-:root{
-  --bg:#0f1720; --card:#1e1e2f; --accent:#22c55e; --muted:#9ca3af;
-  --common:#777; --rare:#3b82f6; --epic:#a855f7; --legendary:#fbbf24;
-}
-body{
-  margin:0; background:var(--bg); font-family:system-ui,sans-serif;
-  display:flex; justify-content:center; align-items:center; min-height:100vh; color:#e7eef6;
-}
-.wrap{width:100%;max-width:960px;padding:20px;box-sizing:border-box}
-.card{display:grid;grid-template-columns:280px 1fr;gap:20px;background:var(--card);padding:20px;border-radius:16px;box-shadow:0 0 40px rgba(0,0,0,0.7);}
-.click-area{background:#0b1120;padding:15px;border-radius:16px;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden;transition:box-shadow .3s;}
-.click-img{width:200px;height:200px;object-fit:contain;cursor:pointer;border-radius:12px;transition:transform .08s, filter .12s;}
-.click-img:active{transform:scale(.92);}
-.big-score{font-size:38px;font-weight:bold;color:var(--accent);margin-top:10px}
-.muted{color:var(--muted);font-size:13px}
-.panel{display:flex;flex-direction:column;gap:12px}
-.row{display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.05);border-radius:8px}
-.btn{cursor:pointer;padding:8px 14px;border-radius:10px;background:rgba(255,255,255,0.1);border:0;color:white;font-weight:bold;transition:all .2s;}
-.btn:hover{background:rgba(255,255,255,0.2);transform:scale(1.05);}
-.btn:disabled{opacity:.45;cursor:not-allowed;}
-.shop{display:flex;flex-direction:column;gap:10px;margin-top:10px}
-.shop-item{display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.05);border-radius:10px;transition:all .2s;}
-.shop-item:hover{background:rgba(255,255,255,0.12)}
-.pop{position:absolute;pointer-events:none;font-weight:bold;color:var(--accent);animation:pop .7s forwards;}
-@keyframes pop{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-45px) scale(1.3)}}
-.loot-anim{position:absolute;inset:0;border-radius:16px;pointer-events:none;animation:lootFlash .8s ease-out;}
-@keyframes lootFlash{0%{opacity:0;box-shadow:0 0 0 #fff}30%{opacity:1;box-shadow:0 0 60px 20px #fbbf24;}100%{opacity:0;box-shadow:0 0 0 #fff}}
-.rarity-common{box-shadow:0 0 25px 5px var(--common);}
-.rarity-rare{box-shadow:0 0 30px 8px var(--rare)aa;}
-.rarity-epic{box-shadow:0 0 40px 10px var(--epic)aa;}
-.rarity-legendary{box-shadow:0 0 55px 14px var(--legendary)aa;}
-.tooltip{
-  position:absolute;padding:5px 10px;border-radius:6px;background:rgba(0,0,0,0.8);color:white;font-size:12px;pointer-events:none;opacity:0;transition:opacity .2s;
-}
-@media(max-width:720px){.card{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <div class="card">
-    <div class="click-area" id="clickArea">
-      <img src="IMG_3480.png" id="clickImg" class="click-img" alt="Klikni">
-      <div class="muted">Kliky celkem</div>
-      <div class="big-score" id="scoreDisplay">0</div>
-      <div class="tooltip" id="tooltip"></div>
-    </div>
-    <div class="panel">
-      <div class="row"><div>Za klik</div><div class="muted" id="perClick">+1</div></div>
-      <div class="row"><div>Auto CPS</div><div class="muted" id="cpsDisplay">0 /s</div></div>
-      <button class="btn" id="resetBtn">Reset</button>
-      <div class="shop">
-        <div class="muted">Obchod</div>
-        <div class="shop-item"><div><strong>Malý bonus</strong><br><span class="muted">+1 za klik</span></div><button class="btn" id="buySmall">50</button></div>
-        <div class="shop-item"><div><strong>Velký bonus</strong><br><span class="muted">+5 za klik</span></div><button class="btn" id="buyBig">400</button></div>
-        <div class="shop-item"><div><strong>Ultra bonus</strong><br><span class="muted">+20 za klik</span></div><button class="btn" id="buyUltra">2000</button></div>
-        <div class="shop-item"><div><strong>Mega auto</strong><br><span class="muted">+5 CPS</span></div><button class="btn" id="buyMegaAuto">1500</button></div>
-        <div class="shop-item"><div><strong>Hyper auto</strong><br><span class="muted">+20 CPS</span></div><button class="btn" id="buyHyperAuto">8000</button></div>
-        <div class="shop-item"><div><strong>Lootbox (Skin)</strong><br><span class="muted">Náhodný skin</span></div><button class="btn" id="buyLoot">1000</button></div>
-      </div>
-    </div>
+<html>
+<title>Clicker Clicker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<body onbeforeunload="return closingCode()">
+  <link rel="stylesheet" href="index.css">
+    <script src="index.js"></script>
+  <div class='topbar'>
+    <a href='http://leemlam.github.io'>ZOB1 Clicker</a>
   </div>
-</div>
-<script>
-// --- SOUNDS ---
-function playSound(src){const a=new Audio(src);a.play().catch(()=>{});}
-const clickSound="uhh-anime.mp3";
-const lootSound="tak-bojuj-ne.mp3";
-
-// --- STATE ---
-let s={points:0,perClick:1,cps:0,skinIndex:0};
-let price={small:50,big:400,ultra:2000,megaAuto:1500,hyperAuto:8000,loot:1000};
-
-// --- SKINS ---
-const skins=[
-{file:"IMG_3480.png",rarity:"common",bonus:null,name:"Základní"},
-{file:"IMG_3481.png",rarity:"common",bonus:{perClick:1},name:"Skin 1"},
-{file:"IMG_3482.png",rarity:"common",bonus:{cps:1},name:"Skin 2"},
-{file:"IMG_3483.png",rarity:"rare",bonus:{perClick:3},name:"Skin 3"},
-{file:"IMG_3484.png",rarity:"rare",bonus:{cps:3},name:"Skin 4"},
-{file:"IMG_3485.png",rarity:"epic",bonus:{perClickMult:1.3},name:"Skin 5"},
-{file:"IMG_3486.png",rarity:"epic",bonus:{cpsMult:1.4},name:"Skin 6"},
-{file:"IMG_3503.png",rarity:"legendary",bonus:{perClickMult:2,cpsMult:2},name:"Legendary Skin"}
-];
-
-// --- ELEMENTY ---
-const scoreDisplay=document.getElementById("scoreDisplay");
-const perClickEl=document.getElementById("perClick");
-const cpsEl=document.getElementById("cpsDisplay");
-const clickImg=document.getElementById("clickImg");
-const clickArea=document.getElementById("clickArea");
-const tooltip=document.getElementById("tooltip");
-const btnSmall=document.getElementById("buySmall");
-const btnBig=document.getElementById("buyBig");
-const btnUltra=document.getElementById("buyUltra");
-const btnMega=document.getElementById("buyMegaAuto");
-const btnHyper=document.getElementById("buyHyperAuto");
-const btnLoot=document.getElementById("buyLoot");
-const resetBtn=document.getElementById("resetBtn");
-
-// --- UI UPDATE ---
-function updateUI(){
-  scoreDisplay.textContent=Math.floor(s.points);
-
-  const skin=skins[s.skinIndex];
-  let totalPerClick = s.perClick + (skin.bonus?.perClick || 0);
-  if(skin.bonus?.perClickMult) totalPerClick *= skin.bonus.perClickMult;
-  perClickEl.textContent="+"+Math.floor(totalPerClick);
-
-  let totalCps = s.cps + (skin.bonus?.cps || 0);
-  if(skin.bonus?.cpsMult) totalCps *= skin.bonus.cpsMult;
-  cpsEl.textContent=Math.floor(totalCps)+" /s";
-
-  btnSmall.textContent=price.small;
-  btnBig.textContent=price.big;
-  btnUltra.textContent=price.ultra;
-  btnMega.textContent=price.megaAuto;
-  btnHyper.textContent=price.hyperAuto;
-  btnLoot.textContent=price.loot;
-
-  btnSmall.disabled=s.points<price.small;
-  btnBig.disabled=s.points<price.big;
-  btnUltra.disabled=s.points<price.ultra;
-  btnMega.disabled=s.points<price.megaAuto;
-  btnHyper.disabled=s.points<price.hyperAuto;
-  btnLoot.disabled=s.points<price.loot;
-}
-
-// --- CLICK HANDLER ---
-let clickCounter=0;
-const clickWarningLimit=20;
-clickImg.onclick = e => {
-  clickCounter++;
-  setTimeout(()=>clickCounter--,1000);
-  if(clickCounter>clickWarningLimit){showWarning("Příliš rychlé klikání!");return;}
-
-  playSound(clickSound);
-
-  const skin=skins[s.skinIndex];
-  let gain = s.perClick + (skin.bonus?.perClick || 0);
-  if(skin.bonus?.perClickMult) gain *= skin.bonus.perClickMult;
-
-  s.points += gain;
-
-  const rect=clickArea.getBoundingClientRect();
-  spawnPop(e.clientX-rect.left, e.clientY-rect.top,"+"+Math.floor(gain));
-
-  clickImg.style.filter="brightness(1.35)";
-  setTimeout(()=>clickImg.style.filter="",100);
-  updateUI(); save();
-};
-
-// --- CPS LOOP ---
-setInterval(()=>{
-  const skin=skins[s.skinIndex];
-  let totalCps = s.cps + (skin.bonus?.cps || 0);
-  if(skin.bonus?.cpsMult) totalCps *= skin.bonus.cpsMult;
-  s.points += totalCps/5;
-  updateUI(); save();
-}, 200);
-
-// --- LOOTBOX ---
-btnLoot.onclick = ()=>{
-  if(s.points<price.loot) return;
-  s.points -= price.loot;
-  playSound(lootSound);
-
-  const fx=document.createElement("div");fx.className="loot-anim";clickArea.appendChild(fx);
-  setTimeout(()=>fx.remove(),900);
-
-  let rand=Math.random(), i;
-  if(rand<0.01) i=skins.length-1; // legendary
-  else i=Math.floor(Math.random()*(skins.length-1));
-
-  s.skinIndex=i;
-  const skin=skins[i];
-  clickImg.src=skin.file;
-  clickArea.className="click-area rarity-"+skin.rarity;
-
-  clickImg.style.transform="scale(0) rotate(-30deg)";
-  setTimeout(()=>clickImg.style.transform="scale(1.2) rotate(10deg)",200);
-  setTimeout(()=>clickImg.style.transform="scale(1) rotate(0deg)",400);
-
-  updateUI(); save();
-  showSkinBonus(skin);
-};
-
-// --- TRIAL SKIN ---
-const trialSelect=document.createElement("select");
-trialSelect.className="btn";
-skins.forEach((sk,i)=>{ if(i===0) return; const opt=document.createElement("option"); opt.value=i; opt.textContent=sk.name+" ("+sk.rarity+")"; trialSelect.appendChild(opt); });
-document.querySelector(".shop").appendChild(trialSelect);
-
-const trialBtn=document.createElement("button");
-trialBtn.className="btn"; trialBtn.textContent="Vyzkoušet skin";
-document.querySelector(".shop").appendChild(trialBtn);
-
-let trialCooldown=false;
-trialBtn.onclick = ()=>{
-  if(trialCooldown) return;
-  const skinIndex=parseInt(trialSelect.value);
-  const trialSkin=skins[skinIndex];
-  const prevIndex=s.skinIndex;
-
-  clickImg.src=trialSkin.file;
-  clickArea.className="click-area rarity-"+trialSkin.rarity;
-
-  let text="Trial Skin: "+trialSkin.name+" | ";
-  if(trialSkin.bonus){
-    if(trialSkin.bonus.perClick) text+="+ "+trialSkin.bonus.perClick+" perClick ";
-    if(trialSkin.bonus.cps) text+="+ "+trialSkin.bonus.cps+" CPS ";
-    if(trialSkin.bonus.perClickMult) text+="×"+trialSkin.bonus.perClickMult+" perClick ";
-    if(trialSkin.bonus.cpsMult) text+="×"+trialSkin.bonus.cpsMult+" CPS ";
-  } else text+="Žádné bonusy (trial)";
-
-  const el=document.createElement("div");
-  el.className="pop"; el.textContent=text;
-  el.style.left="50%"; el.style.top="10%"; el.style.transform="translateX(-50%)";
-  clickArea.appendChild(el);
-  setTimeout(()=>el.remove(),3000);
-
-  trialBtn.disabled=true; trialCooldown=true;
-  setTimeout(()=>{
-    clickImg.src=skins[prevIndex].file;
-    clickArea.className="click-area rarity-"+skins[prevIndex].rarity;
-  },30000);
-
-  let cooldownTime=300;
-  const interval=setInterval(()=>{
-    cooldownTime--;
-    trialBtn.textContent="Cooldown: "+Math.ceil(cooldownTime/60)+":"+("0"+(cooldownTime%60)).padStart(2,"0");
-    if(cooldownTime<=0){
-      trialBtn.textContent="Vyzkoušet skin";
-      trialBtn.disabled=false;
-      trialCooldown=false;
-      clearInterval(interval);
-    }
-  },1000);
-};
-
-// --- SAVE / LOAD ---
-const KEY="clicker_skins_v8";
-function save(){localStorage.setItem(KEY,JSON.stringify(s));}
-function load(){
-  const r=localStorage.getItem(KEY);
-  if(!r) return;
-  try{Object.assign(s,JSON.parse(r));
-      clickImg.src=skins[s.skinIndex].file;
-      clickArea.className="click-area rarity-"+skins[s.skinIndex].rarity;
-  }catch{}
-}
-resetBtn.onclick=()=>{if(!confirm("Opravdu resetovat?")) return;localStorage.removeItem(KEY);location.reload();}
-
-// --- INIT ---
-load(); updateUI();
-</script>
+    <center class='center'>
+      <h1 id='total'>LB: 0</h1>
+      <h5 id="click" style="font-family:trebuchet MS;">LB/click: 1 | LB/sec: 0</h5>
+      <img class="round" src="https://decostones.ie/wp-content/uploads/2015/11/click-hand.png" width="150" onclick='clicked()'></img>
+      <br><br>
+      <button id='upgrade' class="round" onclick='upgrade("upgrade")' style="font-family:courier;">0-main upgrade: 15</button>
+      <br><br>
+      <button id='cat' class="round" onclick='upgrade("clicker cat")' style="font-family:courier;">0-clicker cat: 25 | +1/sec</button>
+      <br><br>
+      <button id='worker' class="round" onclick='upgrade("worker")' style="font-family:courier;">0-worker: 250 | +15/sec</button><br><br>
+      <button class="settings" onclick="save()">Save</button>
+      <button class="settings" onclick="load()">Load</button>
+      <button class="settings" onclick="reset()">Reset</button><br><br>
+    </center>
+  </link>
 </body>
+</meta>
+
 </html>
